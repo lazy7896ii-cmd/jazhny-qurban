@@ -49,6 +49,13 @@
             animation: textGlow 2s ease-in-out infinite alternate;
             opacity: 0; /* دەشاردرێتەوە تا سکریپتەکە دەستپێدەکات */
         }
+        @media (max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            p { font-size: 1.3rem; }
+            .card { padding: 20px; }
+            .floating-icon { font-size: 3.5rem; }
+            .decoration { font-size: 2rem; }
+        }
         p {
             font-size: 1.8rem;
             line-height: 1.6;
@@ -161,11 +168,11 @@
                 bg: "radial-gradient(circle at center, #512b58, #2c003e, #000000)"
             },
             {
-                title: "هەمیشە لە خۆشیدا بن",
-                content: "لەم جەژنەدا هیوادارم هەموو خەمەکانتان ببنە شادی، <br> و ماڵەکانتان پڕ بێت لە نوور و بەرەکەتی خوای گەورە.",
-                decoration: "🐑✨",
+            title: "",
+            content: "خوای گەورە عیبادەت و نزاکانتان لێ وەربگرێت، <br> ئەم جەژنە ببێتە مایەی هاتنەدی گشت خەون و خۆزگەکانتان.",
+            decoration: "🕊️",
                 button: "دووبارە دەستپێکردنەوە ↺",
-                bg: "radial-gradient(circle at center, #3b0033, #1e0026, #000000)"
+            bg: "radial-gradient(circle at center, #1a3c34, #0d211c, #000000)"
             }
         ];
 
@@ -187,7 +194,7 @@
             // پاککردنەوەی کارتەکە
             container.innerHTML = `
                 <div class="${step.decoration === '🕊️' ? 'floating-icon' : 'decoration'}">${step.decoration}</div>
-                <h1 id="step-title"></h1>
+                ${step.title ? '<h1 id="step-title"></h1>' : ''}
                 <p id="step-content"></p>
                 <button class="action-btn" id="next-btn" style="opacity: 0">${step.button}</button>
                 <div class="decoration" id="footer-decoration" style="opacity: 0">${index === 0 ? '🐑✨' : ''}</div>
@@ -201,11 +208,13 @@
             const btn = document.getElementById('next-btn');
 
             // دەستپێکردنی تایپکردن
-            titleEl.innerHTML = step.title;
+            if (titleEl) {
+                titleEl.innerHTML = step.title;
+                const h1Cursor = await typeWriter(titleEl, 80);
+                if (h1Cursor) h1Cursor.remove();
+            }
+
             contentEl.innerHTML = step.content;
-            
-            const h1Cursor = await typeWriter(titleEl, 80);
-            if (h1Cursor) h1Cursor.remove();
             await typeWriter(contentEl, 35);
 
             // نیشاندانی دوگمە
@@ -247,7 +256,10 @@
             return cursor;
         }
 
+        const isMobile = window.innerWidth <= 768;
+
         function createFallingItem() {
+            if (isMobile && Math.random() > 0.4) return; // کەمکردنەوەی تەنۆکەکان لەسەر مۆبایل
             const items = ['🌸', '✨', '❤️', '🌼', '🕊️', '🌙'];
             const item = document.createElement('div');
             item.classList.add('falling-item');
@@ -266,7 +278,7 @@
             }, parseFloat(item.style.duration) * 1000);
         }
 
-        setInterval(createFallingItem, 300);
+        setInterval(createFallingItem, isMobile ? 600 : 300);
 
         document.addEventListener('mousemove', (e) => {
             const card = document.querySelector('.card');
@@ -284,6 +296,7 @@
             particlesJS("particles-js", {
                 "particles": {
                     "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                    "number": { "value": isMobile ? 30 : 80, "density": { "enable": true, "value_area": 800 } },
                     "color": { "value": "#ffffff" },
                     "shape": { "type": "circle" },
                     "opacity": { "value": 0.5, "random": true },
