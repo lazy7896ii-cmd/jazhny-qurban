@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پیرۆزبایی جەژنی قوربان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lateef&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #512b58, #2c003e, #000000);
+            transition: background 2.5s ease; /* خاوتر و سۆزداریتر */
+            font-family: 'Lateef', cursive;
+            color: white;
+            overflow-x: hidden;
+            perspective: 1000px; /* بۆ کاریگەری 3D */
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .card {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.07);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            max-width: 90%;
+            animation: fadeIn 2s ease-in-out, cardPulse 6s infinite ease-in-out;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out, opacity 1s ease, filter 1s ease;
+        }
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.7), 0 0 20px rgba(241, 196, 15, 0.5);
+            animation: textGlow 2s ease-in-out infinite alternate;
+            opacity: 0; /* دەشاردرێتەوە تا سکریپتەکە دەستپێدەکات */
+        }
+        p {
+            font-size: 1.8rem;
+            line-height: 1.6;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+            opacity: 0;
+        }
+        .decoration {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        .floating-icon {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: vibrate 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.4));
+        }
+        .action-btn, .back-btn {
+            display: inline-block;
+            text-decoration: none;
+            background-color: #f1c40f;
+            color: #1e5128;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-top: 20px;
+            font-family: 'Lateef', cursive;
+        }
+        .action-btn:hover, .back-btn:hover {
+            transform: scale(1.05);
+            background-color: #d4ac0d;
+        }
+        @keyframes cardPulse {
+            0%, 100% { box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
+            50% { box-shadow: 0 25px 70px rgba(241, 196, 15, 0.15); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes vibrate {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(-2deg); }
+            50% { transform: translateY(0) rotate(2deg); }
+            75% { transform: translateY(-5px) rotate(-1deg); }
+        }
+        @keyframes textGlow {
+            from {
+                text-shadow: 0 0 10px rgba(241, 196, 15, 0.5), 0 0 20px rgba(241, 196, 15, 0.3);
+            }
+            to {
+                text-shadow: 0 0 25px rgba(241, 196, 15, 0.9), 0 0 35px rgba(255, 255, 255, 0.4);
+            }
+        }
+        .falling-item {
+            position: absolute;
+            top: -50px;
+            pointer-events: none;
+            z-index: -1;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(105vh) rotate(360deg); }
+        }
+        .cursor {
+            border-left: 3px solid #f1c40f;
+            margin-right: 5px;
+            animation: blink 0.7s steps(1) infinite;
+        }
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        .credits {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            color: #f1c40f;
+            opacity: 0.6;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div id="card-container" class="card">
+        <!-- لێرەدا دەقەکان بە داینامیکی دادەنرێن -->
+    </div>
+
+    <div class="credits">Made By : Aland Graphic</div>
+
+    <audio id="typingSound" src="keyboard_type.mp3" preload="auto"></audio>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+    <script>
+        const steps = [
+            {
+                title: "جەژنتان پیرۆز بێــــت",
+                content: "هەموو ڕۆژێکتان هەر جەژن و خۆشی بێت , <br> تەمەنتان پڕ خێر و بەرەکەت بێـــــــت.",
+                decoration: "🌙",
+                button: "بەرەو پەیامی داهاتوو ➔",
+                bg: "radial-gradient(circle at center, #512b58, #2c003e, #000000)"
+            },
+            {
+                title: "هەمیشە لە خۆشیدا بن",
+                content: "لەم جەژنەدا هیوادارم هەموو خەمەکانتان ببنە شادی، <br> و ماڵەکانتان پڕ بێت لە نوور و بەرەکەتی خوای گەورە.",
+                decoration: "🐑✨",
+                button: "دووبارە دەستپێکردنەوە ↺",
+                bg: "radial-gradient(circle at center, #3b0033, #1e0026, #000000)"
+            }
+        ];
+
+        let currentStep = 0;
+
+        async function showStep(index) {
+            const container = document.getElementById('card-container');
+            const step = steps[index];
+            
+            // ئەنیمەیشنی چوونە دەرەوەی نەرم
+            container.style.opacity = "0";
+            container.style.filter = "blur(10px)";
+            
+            await new Promise(r => setTimeout(r, 800));
+
+            // گۆڕینی پاشبنەما
+            document.body.style.background = step.bg;
+
+            // پاککردنەوەی کارتەکە
+            container.innerHTML = `
+                <div class="${step.decoration === '🕊️' ? 'floating-icon' : 'decoration'}">${step.decoration}</div>
+                <h1 id="step-title"></h1>
+                <p id="step-content"></p>
+                <button class="action-btn" id="next-btn" style="opacity: 0">${step.button}</button>
+                <div class="decoration" id="footer-decoration" style="opacity: 0">${index === 0 ? '🐑✨' : ''}</div>
+            `;
+
+            container.style.opacity = "1";
+            container.style.filter = "blur(0px)";
+
+            const titleEl = document.getElementById('step-title');
+            const contentEl = document.getElementById('step-content');
+            const btn = document.getElementById('next-btn');
+
+            // دەستپێکردنی تایپکردن
+            titleEl.innerHTML = step.title;
+            contentEl.innerHTML = step.content;
+            
+            const h1Cursor = await typeWriter(titleEl, 80);
+            if (h1Cursor) h1Cursor.remove();
+            await typeWriter(contentEl, 35);
+
+            // نیشاندانی دوگمە
+            btn.style.opacity = "1";
+            btn.onclick = () => {
+                currentStep = (currentStep + 1) % steps.length;
+                showStep(currentStep);
+            };
+
+            // تەقاندنی کۆنفێتی
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#f1c40f', '#ffffff', '#512b58']
+            });
+        }
+
+        async function typeWriter(el, speed = 100) {
+            const text = el.innerHTML;
+            el.innerHTML = '<span class="cursor"></span>';
+            el.style.opacity = "1";
+            const cursor = el.querySelector('.cursor');
+            const typingAudio = document.getElementById('typingSound');
+            typingAudio.volume = 0.1;
+            for (let i = 0; i < text.length; i++) {
+                if (text.substr(i, 4) === "<br>") {
+                    cursor.insertAdjacentHTML('beforebegin', '<br>');
+                    i += 3;
+                } else {
+                    cursor.insertAdjacentHTML('beforebegin', text.charAt(i));
+                    if (text.charAt(i) !== ' ' && text.charAt(i) !== '\n') {
+                        typingAudio.currentTime = 0;
+                        typingAudio.play().catch(e => console.log("Audio play prevented:", e));
+                    }
+                }
+                await new Promise(resolve => setTimeout(resolve, speed));
+            }
+            return cursor;
+        }
+
+        function createFallingItem() {
+            const items = ['🌸', '✨', '❤️', '🌼', '🕊️', '🌙'];
+            const item = document.createElement('div');
+            item.classList.add('falling-item');
+            item.innerText = items[Math.floor(Math.random() * items.length)];
+            item.style.left = Math.random() * 100 + 'vw';
+            item.style.fontSize = Math.random() * 20 + 10 + 'px';
+            item.style.opacity = Math.random();
+            item.style.duration = Math.random() * 3 + 2 + 's';
+            
+            item.style.animationDuration = item.style.duration;
+            
+            document.body.appendChild(item);
+            
+            setTimeout(() => {
+                item.remove();
+            }, parseFloat(item.style.duration) * 1000);
+        }
+
+        setInterval(createFallingItem, 300);
+
+        document.addEventListener('mousemove', (e) => {
+            const card = document.querySelector('.card');
+            if(!card) return;
+            const x = (window.innerWidth / 2 - e.pageX) / 30;
+            const y = (window.innerHeight / 2 - e.pageY) / 30;
+            card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        });
+
+        window.addEventListener('load', async () => {
+            // نیشاندانی قۆناغی یەکەم
+            showStep(0);
+
+            // Particles.js initialization
+            particlesJS("particles-js", {
+                "particles": {
+                    "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                    "color": { "value": "#ffffff" },
+                    "shape": { "type": "circle" },
+                    "opacity": { "value": 0.5, "random": true },
+                    "size": { "value": 3, "random": true },
+                    "line_linked": { "enable": false },
+                    "move": { "enable": true, "speed": 1, "direction": "none", "random": true, "straight": false, "out_mode": "out" }
+                },
+                "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": false } } },
+                "retina_detect": true
+            });
+        });
+    </script>
+</body>
+</html>
